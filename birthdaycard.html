@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Birthday Card Creator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f7e8;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .container {
+            display: flex;
+            gap: 30px;
+            max-width: 1200px;
+            width: 100%;
+            z-index: 10;
+            position: relative;
+        }
+
+        .poster {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .poster img {
+            max-width: 100%;
+            max-height: 500px;
+            object-fit: contain;
+        }
+        
+        .card-form {
+            flex: 1;
+            background-color: white;
+            border-radius: 10px;
+            padding: 50px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+        
+        .candles {
+            position: absolute;
+            top: -20px;
+            right: 30px;
+            display: flex;
+        }
+        
+        .candle {
+            width: 10px;
+            height: 30px;
+            background-color: #5cdb95;
+            margin: 0 5px;
+            position: relative;
+        }
+        
+        .candle::after {
+            content: "";
+            position: absolute;
+            top: -10px;
+            left: 1px;
+            width: 8px;
+            height: 12px;
+            background-color: #ffcc00;
+            border-radius: 50% 50% 0 0;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        
+        input, textarea, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+            box-sizing: border-box;
+        }
+        
+        .error {
+            color: red;
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+        
+        .create-button {
+            background-color: blueviolet;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 12px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            width: 100%;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 10px;
+            transition: background-color 0.3s ease;
+        }
+
+        .create-button:hover {
+            background-color: #6a1b9a;
+        }
+        
+        .preview {
+            display: none;
+            background: #f4f4f4;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+            text-align: center;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .emo-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 20;
+            pointer-events: none;
+        }
+
+        .emo {
+            display: flex;
+            position: fixed;
+            width: 150px;  /* Reduced from 250px */
+            height: 150px; /* Reduced from 250px */
+            transform: rotate(var(--rotate)) scale(var(--scale));
+            transition: all 0.5s ease;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(var(--rotate)) scale(var(--scale)); }
+            50% { transform: translateY(-20px) rotate(var(--rotate)) scale(var(--scale)); }
+        }
+
+        .emo-top-left { 
+            width: 200px;
+            height: 200px;
+            top:-0.8px;  /* Adjusted to keep full emoji in view */
+            left: -8px;  /* Adjusted to keep full emoji in view */
+            --rotate: -15deg;
+            --scale: 1;
+        }
+        .emo-top-right { 
+            top: 5%;
+            left: 89%;
+            --rotate: 45deg;
+            --scale: 1;
+        }
+        .emo-bottom-left { 
+            bottom: 4%; 
+            left: -8px;
+            --rotate: 40deg;
+            --scale: 1.1;
+        }
+        .emo-bottom-right { 
+            bottom: -10px;
+            left: 89%; 
+            --rotate: -25deg;
+            --scale: 1;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .poster img {
+                max-height: 300px;
+            }
+
+            .emo {
+                width: 120px;  /* Further reduced for mobile */
+                height: 120px; /* Further reduced for mobile */
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="poster">
+            <img src="Screenshot 2025-03-24 203240.png" alt="Birthday Poster">
+        </div>
+        <div class="card-form">
+            <div class="candles">
+                <div class="candle"></div>
+                <div class="candle"></div>
+                <div class="candle"></div>
+            </div>
+            
+            <div class="form-group">
+                <label for="name" >Name</label>
+                <input type="text" id="name" placeholder="Enter name" maxlength="50">
+                <div class="error" id="name-error"></div>
+            </div>
+            
+            <div class="form-group">
+                <label for="age">Age</label>
+                <input type="number" id="age" placeholder="Enter age" min="1" max="120">
+                <div class="error" id="age-error"></div>
+            </div>
+            
+            <div class="form-group">
+                <label for="message">Message</label>
+                <textarea id="message" placeholder="Enter message" maxlength="500" rows="4"></textarea>
+                <div class="error" id="message-error"></div>
+            </div>
+            
+            <div class="form-group">
+                <label for="song">Select a Song</label>
+                <select id="song">
+                    <option value="" disabled selected>Choose a birthday song</option>
+                    <option value="traditional">Traditional Happy Birthday</option>
+                    <option value="beatles">Beatles Birthday Song</option>
+                    <option value="stevie">Stevie Wonder - Happy Birthday</option>
+                    <option value="kool">Kool & The Gang - Celebration</option>
+                </select>
+                <div class="error" id="song-error"></div>
+            </div>
+            
+            <button class="create-button">CREATE BIRTHDAY CARD</button>
+            
+            <div class="preview" id="preview"></div>
+        </div>
+    </div>
+
+    <div class="emo-container" >
+        <img src="confetti-removebg-preview.png" class="emo emo-top-left">
+        <img src="pngaaa.com-3740452-removebg-preview.png" class="emo emo-top-right">
+        <img src="balloon-removebg-preview.png" class="emo emo-bottom-left">
+        <img src="birthday-cake-removebg-preview.png" class="emo emo-bottom-right">
+    </div>
+
+    <script src="script.js">
+        document.querySelector('.create-button').addEventListener('click', function() {
+            const name = document.getElementById('name');
+            const age = document.getElementById('age');
+            const message = document.getElementById('message');
+            const song = document.getElementById('song');
+            const preview = document.getElementById('preview');
+            let valid = true;
+
+            // Reset error messages
+            document.querySelectorAll('.error').forEach(error => error.textContent = '');
+
+            // Validation
+            if (!name.value.trim()) {
+                document.getElementById('name-error').textContent = 'Name is required';
+                valid = false;
+            } else if (name.value.trim().length > 50) {
+                document.getElementById('name-error').textContent = 'Name must be 50 characters or less';
+                valid = false;
+            }
+
+            if (!age.value.trim()) {
+                document.getElementById('age-error').textContent = 'Age is required';
+                valid = false;
+            } else {
+                const ageValue = parseInt(age.value);
+                if (isNaN(ageValue) || ageValue < 1 || ageValue > 120) {
+                    document.getElementById('age-error').textContent = 'Please enter a valid age between 1 and 120';
+                    valid = false;
+                }
+            }
+
+            if (!message.value.trim()) {
+                document.getElementById('message-error').textContent = 'Message is required';
+                valid = false;
+            } else if (message.value.trim().length > 500) {
+                document.getElementById('message-error').textContent = 'Message must be 500 characters or less';
+                valid = false;
+            }
+
+            if (!song.value) {
+                document.getElementById('song-error').textContent = 'Please select a song';
+                valid = false;
+            }
+            
+            if (valid) {
+                preview.innerHTML = `
+                    <h2>Happy Birthday, ${name.value.trim()}!</h2>
+                    <p><strong>Age:</strong> ${age.value} years old</p>
+                    <p><strong>Special Message:</strong> ${message.value.trim()}</p>
+                    <p><strong>Birthday Song:</strong> ${song.options[song.selectedIndex].text}</p>
+                `;
+                preview.style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>
